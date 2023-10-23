@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dwitter</title>
+  </head>
+  <body>
+    <h1>Dwitter</h1>
+    <ul>
+      <li><a href="#">All Dwitter</a></li>
+      <li><a href="#">My Dwitter</a></li>
+      <li><a href="#">Login</a></li>
+    </ul>
+    <form
+      name="contentForm"
+      action="/dwitter"
+      method="post"
+      style="border: 1px solid #555"
+    >
+      <input type="text" name="id" placeholder="id" />
+      <input type="text" name="name" placeholder="name" />
+      <input type="text" name="imgUrl" placeholder="image url" /><br />
+      <input type="text" name="content" style="width: 70%" />
+      <button type="submit">Post</button>
+    </form>
+    <% dwitterList.forEach(user=>{%>
+    <div style="border: 1px solid black; margin-top: 10px">
+      <span style="float: right; padding: 5px; cursor: pointer" onclick="remove('<%=user.pid%>')">삭제</span>
+      <span
+        style="float: right; padding: 5px; cursor: pointer"
+        onclick="updateToggle('<%=user.pid%>')"
+        >편집</span
+      >
+      <img
+      src=<%=user.imgUrl?user.imgUrl:"https://www.shutterstock.com/image-vector/man-icon-vector-250nw-1040084344.jpg"
+      %> alt="" style="clear: both; width: 50px;">
+      <span><%=user.name %></span>
+      <span><a href="/dwitter/<%=user.id %>"><%=`@${user.id}` %></a></span>
+      <span><%=user.date %></span>
+      <div><%=user.content %></div>
+      <div style="display: none" id="updateFoam_<%=user.pid%>">
+        <input type="text" id="updateContent_<%=user.pid%>" style="width: 80%" />
+        <button type="button" onclick="update('<%=user.pid%>')">update</button>
+      </div>
+    </div>
+    <% })%>
+    <script>
+      function updateToggle(pid) {
+        const updateFoam = document.querySelector("#updateFoam_" + pid);
+        const updateContent = document.querySelector("#updateContent_" + pid);
+
+        if (updateFoam.style.display == "none"){
+          updateFoam.style.display = "block";
+          updateContent.focus()
+        }
+        else {
+          updateFoam.style.display = "none";
+          updateContent.value = "";
+        }
+      }
+      function update(pid){
+        const updateText=document.querySelector("#updateContent_" + pid).value
+        fetch('/dwitter',
+        {
+          method:"put",
+          headers:{'content-type': 'application/json'},
+          body:JSON.stringify({content:updateText,pid})
+        }
+        )
+        .then(res=>{
+          if(res.status==204){
+            alert('업데이트 성공!')
+            window.location.reload()
+          }
+        })
+        .catch()
+      }
+      function remove(pid){
+        fetch('/dwitter',
+        {
+          method:"delete",
+          headers:{'content-type': 'application/json'},
+          body:JSON.stringify({pid})
+        }
+        )
+        .then(res=>{
+          if(res.status==204){
+            alert('삭제 성공!')
+            window.location.reload()
+          }
+        })
+        .catch()
+      }
+    </script>
+  </body>
+</html>
